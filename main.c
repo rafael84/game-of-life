@@ -1,7 +1,6 @@
 #include <assert.h>
-#include <stdio.h>
-
 #include <raylib.h>
+#include <stdio.h>
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 960
@@ -20,8 +19,7 @@
 #define CELL(board, row, col) (board[row * COLS + col])
 #define SAFE_CELL(board, row, col) (CELL(board, MOD(row, ROWS), MOD(col, COLS)))
 
-int count_neighbors(int board[], int row, int col)
-{
+int count_neighbors(int board[], int row, int col) {
     int count = 0;
     count += SAFE_CELL(board, row - 1, col - 1);
     count += SAFE_CELL(board, row - 1, col + 0);
@@ -39,22 +37,18 @@ static const int blinker[][2] = {{0, 0}, {0, 1}, {0, 2}};
 static const int r_pentomino[][2] = {{0, 1}, {0, 2}, {1, 0}, {1, 1}, {2, 1}};
 static const int toad[][2] = {{0, 1}, {0, 2}, {0, 3}, {1, 0}, {1, 1}, {1, 2}};
 
-void place_pattern(int board[], int base_row, int base_col, const int pattern[][2], int count, int *population)
-{
-    for (int i = 0; i < count; ++i)
-    {
+void place_pattern(int board[], int base_row, int base_col, const int pattern[][2], int count, int* population) {
+    for (int i = 0; i < count; ++i) {
         int r = base_row + pattern[i][0];
         int c = base_col + pattern[i][1];
-        if (CELL(board, r, c) == DEAD)
-        {
+        if (CELL(board, r, c) == DEAD) {
             CELL(board, r, c) = ALIVE;
             (*population)++;
         }
     }
 }
 
-int main(void)
-{
+int main(void) {
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Game of Life");
 
@@ -66,8 +60,8 @@ int main(void)
     int board_a[ROWS * COLS] = {DEAD};
     int board_b[ROWS * COLS] = {DEAD};
 
-    int *current_board = board_a;
-    int *next_board = board_b;
+    int* current_board = board_a;
+    int* next_board = board_b;
 
     place_pattern(current_board, 11, 2, glider, 5, &population);
     place_pattern(current_board, 4, 20, blinker, 3, &population);
@@ -76,63 +70,44 @@ int main(void)
 
     SetTargetFPS(60);
 
-    while (!WindowShouldClose())
-    {
-        if (IsKeyPressed(KEY_Q))
-        {
-            break;
-        }
+    while (!WindowShouldClose()) {
+        if (IsKeyPressed(KEY_Q)) { break; }
 
-        if (IsKeyDown(KEY_SPACE))
-        {
+        if (IsKeyDown(KEY_SPACE)) {
             generation++;
-            for (int row = 0; row < ROWS; ++row)
-            {
-                for (int col = 0; col < COLS; ++col)
-                {
+            for (int row = 0; row < ROWS; ++row) {
+                for (int col = 0; col < COLS; ++col) {
                     int state = CELL(current_board, row, col);
                     CELL(next_board, row, col) = state;
                     int neighbors = count_neighbors(current_board, row, col);
-                    switch (state)
-                    {
-                    case DEAD:
-                    {
-                        if (neighbors == 3)
-                        {
-                            CELL(next_board, row, col) = ALIVE;
-                            population += 1;
+                    switch (state) {
+                        case DEAD: {
+                            if (neighbors == 3) {
+                                CELL(next_board, row, col) = ALIVE;
+                                population += 1;
+                            }
+                        } break;
+                        case ALIVE: {
+                            if (neighbors < 2) {
+                                CELL(next_board, row, col) = DEAD;
+                                population -= 1;
+                            } else if (neighbors == 2 || neighbors == 3) {
+                                CELL(next_board, row, col) = ALIVE;
+                            } else {
+                                CELL(next_board, row, col) = DEAD;
+                                population -= 1;
+                            }
+                        } break;
+                        default: {
+                            assert(0 && "unreachable");
                         }
-                    }
-                    break;
-                    case ALIVE:
-                    {
-                        if (neighbors < 2)
-                        {
-                            CELL(next_board, row, col) = DEAD;
-                            population -= 1;
-                        }
-                        else if (neighbors == 2 || neighbors == 3)
-                        {
-                            CELL(next_board, row, col) = ALIVE;
-                        }
-                        else
-                        {
-                            CELL(next_board, row, col) = DEAD;
-                            population -= 1;
-                        }
-                    }
-                    break;
-                    default:
-                    {
-                        assert(0 && "unreachable");
-                    }
                     }
                 }
             }
             //
             // swap current & next board
             //
-            int *tmp = current_board;
+            int* tmp = current_board;
             current_board = next_board;
             next_board = tmp;
         }
@@ -140,10 +115,8 @@ int main(void)
         BeginDrawing();
         ClearBackground(BLACK);
 
-        for (int row = 0; row < ROWS; ++row)
-        {
-            for (int col = 0; col < COLS; ++col)
-            {
+        for (int row = 0; row < ROWS; ++row) {
+            for (int col = 0; col < COLS; ++col) {
                 int state = CELL(current_board, row, col);
                 int x = col * CELL_WIDTH + 1;
                 int y = row * CELL_HEIGHT + 1;
@@ -153,12 +126,9 @@ int main(void)
                 DrawLine(x, y, x, SCREEN_HEIGHT, GRAY);
                 DrawLine(x, y, SCREEN_WIDTH, y, GRAY);
 
-                if (state == ALIVE)
-                {
+                if (state == ALIVE) {
                     DrawRectangle(x, y, w, h, WHITE);
-                }
-                else
-                {
+                } else {
                     DrawRectangle(x, y, w, h, BLACK);
                 }
             }
